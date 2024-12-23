@@ -1,0 +1,258 @@
+import java.util.*;
+import java.text.*;
+
+class Patient {
+    String id;
+    String name;
+    int age;
+    String gender;
+    String address;
+    String contact;
+    Date registrationDate;
+
+    public Patient(String id, String name, int age, String gender, String address, String contact) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+        this.address = address;
+        this.contact = contact;
+        this.registrationDate = new Date();
+    }
+
+    public String getPatientInfo() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        return "ID: " + id + ", Name: " + name + ", Age: " + age + ", Gender: " + gender + ", Address: " + address + ", Contact: " + contact + ", Registered: " + dateFormat.format(registrationDate);
+    }
+}
+
+class Appointment {
+    String appointmentId;
+    String patientId;
+    String doctorId;
+    Date appointmentDate;
+    String appointmentStatus;
+
+    public Appointment(String appointmentId, String patientId, String doctorId, Date appointmentDate) {
+        this.appointmentId = appointmentId;
+        this.patientId = patientId;
+        this.doctorId = doctorId;
+        this.appointmentDate = appointmentDate;
+        this.appointmentStatus = "Scheduled";
+    }
+
+    public String getAppointmentDetails() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        return "Appointment ID: " + appointmentId + ", Patient ID: " + patientId + ", Doctor ID: " + doctorId + ", Date: " + dateFormat.format(appointmentDate) + ", Status: " + appointmentStatus;
+    }
+
+    public void cancelAppointment() {
+        this.appointmentStatus = "Canceled";
+    }
+}
+
+class EHR {
+    String patientId;
+    List<String> medicalHistory;
+    List<String> prescriptions;
+
+    public EHR(String patientId) {
+        this.patientId = patientId;
+        this.medicalHistory = new ArrayList<>();
+        this.prescriptions = new ArrayList<>();
+    }
+
+    public void addMedicalHistory(String history) {
+        medicalHistory.add(history);
+    }
+
+    public void addPrescription(String prescription) {
+        prescriptions.add(prescription);
+    }
+
+    public String getEHRDetails() {
+        StringBuilder details = new StringBuilder("Patient ID: " + patientId + "\nMedical History:\n");
+        for (String history : medicalHistory) {
+            details.append("- ").append(history).append("\n");
+        }
+        details.append("Prescriptions:\n");
+        for (String prescription : prescriptions) {
+            details.append("- ").append(prescription).append("\n");
+        }
+        return details.toString();
+    }
+}
+
+class Billing {
+    String patientId;
+    List<String> services;
+    double totalAmount;
+
+    public Billing(String patientId) {
+        this.patientId = patientId;
+        this.services = new ArrayList<>();
+        this.totalAmount = 0;
+    }
+
+    public void addService(String service, double amount) {
+        services.add(service + ": $" + amount);
+        totalAmount += amount;
+    }
+
+    public String generateBill() {
+        StringBuilder bill = new StringBuilder("Bill for Patient ID: " + patientId + "\n");
+        for (String service : services) {
+            bill.append(service).append("\n");
+        }
+        bill.append("Total Amount: $" + totalAmount);
+        return bill.toString();
+    }
+}
+
+class InventoryItem {
+    String itemId;
+    String name;
+    int quantity;
+    double price;
+
+    public InventoryItem(String itemId, String name, int quantity, double price) {
+        this.itemId = itemId;
+        this.name = name;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
+    public void updateQuantity(int quantity) {
+        this.quantity += quantity;
+    }
+
+    public boolean isLowStock() {
+        return this.quantity < 5;
+    }
+
+    public String getItemDetails() {
+        return "Item ID: " + itemId + ", Name: " + name + ", Quantity: " + quantity + ", Price: $" + price;
+    }
+}
+
+class Staff {
+    String staffId;
+    String name;
+    String role;
+    String contact;
+
+    public Staff(String staffId, String name, String role, String contact) {
+        this.staffId = staffId;
+        this.name = name;
+        this.role = role;
+        this.contact = contact;
+    }
+
+    public String getStaffDetails() {
+        return "Staff ID: " + staffId + ", Name: " + name + ", Role: " + role + ", Contact: " + contact;
+    }
+}
+
+class HospitalSystem {
+    private Map<String, Patient> patients;
+    private Map<String, Appointment> appointments;
+    private Map<String, EHR> ehrRecords;
+    private Map<String, Billing> billings;
+    private Map<String, InventoryItem> inventory;
+    private Map<String, Staff> staff;
+
+    public HospitalSystem() {
+        patients = new HashMap<>();
+        appointments = new HashMap<>();
+        ehrRecords = new HashMap<>();
+        billings = new HashMap<>();
+        inventory = new HashMap<>();
+        staff = new HashMap<>();
+    }
+
+    public void registerPatient(String id, String name, int age, String gender, String address, String contact) {
+        Patient patient = new Patient(id, name, age, gender, address, contact);
+        patients.put(id, patient);
+        EHR ehr = new EHR(id);
+        ehrRecords.put(id, ehr);
+    }
+
+    public void scheduleAppointment(String appointmentId, String patientId, String doctorId, Date appointmentDate) {
+        Appointment appointment = new Appointment(appointmentId, patientId, doctorId, appointmentDate);
+        appointments.put(appointmentId, appointment);
+    }
+
+    public void addServiceToBill(String patientId, String service, double amount) {
+        Billing billing = billings.getOrDefault(patientId, new Billing(patientId));
+        billing.addService(service, amount);
+        billings.put(patientId, billing);
+    }
+
+    public void addInventoryItem(String itemId, String name, int quantity, double price) {
+        InventoryItem item = new InventoryItem(itemId, name, quantity, price);
+        inventory.put(itemId, item);
+    }
+
+    public void addStaff(String staffId, String name, String role, String contact) {
+        Staff staffMember = new Staff(staffId, name, role, contact);
+        staff.put(staffId, staffMember);
+    }
+
+    public String getPatientDetails(String patientId) {
+        return patients.get(patientId).getPatientInfo();
+    }
+
+    public String getAppointmentDetails(String appointmentId) {
+        return appointments.get(appointmentId).getAppointmentDetails();
+    }
+
+    public String getEHRDetails(String patientId) {
+        return ehrRecords.get(patientId).getEHRDetails();
+    }
+
+    public String getBillDetails(String patientId) {
+        return billings.get(patientId).generateBill();
+    }
+
+    public String getInventoryItemDetails(String itemId) {
+        return inventory.get(itemId).getItemDetails();
+    }
+
+    public void checkLowStock() {
+        for (InventoryItem item : inventory.values()) {
+            if (item.isLowStock()) {
+                System.out.println("Low stock alert: " + item.getItemDetails());
+            }
+        }
+    }
+
+    public String getStaffDetails(String staffId) {
+        return staff.get(staffId).getStaffDetails();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        HospitalSystem hospital = new HospitalSystem();
+
+        hospital.registerPatient("P001", "John Doe", 30, "Male", "123 Main St", "555-1234");
+        hospital.registerPatient("P002", "Jane Smith", 28, "Female", "456 Elm St", "555-5678");
+
+        hospital.addStaff("S001", "Dr. Alice Brown", "Doctor", "555-9876");
+        hospital.addStaff("S002", "Nurse Emily Clark", "Nurse", "555-6789");
+
+        hospital.scheduleAppointment("A001", "P001", "S001", new Date());
+        hospital.addServiceToBill("P001", "Consultation", 100);
+        hospital.addServiceToBill("P001", "X-ray", 150);
+
+        hospital.addInventoryItem("I001", "Bandages", 10, 5);
+        hospital.addInventoryItem("I002", "Syringe", 3, 2);
+
+        System.out.println(hospital.getPatientDetails("P001"));
+        System.out.println(hospital.getAppointmentDetails("A001"));
+        System.out.println(hospital.getBillDetails("P001"));
+        System.out.println(hospital.getInventoryItemDetails("I001"));
+
+        hospital.checkLowStock();
+    }
+}
